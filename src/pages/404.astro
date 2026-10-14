@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import Hamster from "../components/Hamster.astro";
+import Icon from "../components/Icon.astro";
 ---
 
 <Base title="Not found · Nibblets">
@@ -8,7 +9,9 @@ import Hamster from "../components/Hamster.astro";
     <Hamster name="sleepy" size={180} mood="sleeping" />
     <h1>This page has wandered off</h1>
     <p>It's probably asleep in a toilet roll somewhere.</p>
-    <a href="/">Back home 🏡</a>
+    <a href="/">
+      <Icon name="house" size={18} /> Back home
+    </a>
   </main>
 </Base>
 
@@ -30,6 +33,9 @@ import Hamster from "../components/Hamster.astro";
     color: var(--dim);
   }
   a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-weight: 700;
   }
 </style>

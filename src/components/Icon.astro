@@ -1,0 +1,60 @@
+---
+// Icons, inlined: Lucide's for things, Simple Icons' for brands' own logos.
+import alarmClock from "lucide-static/icons/alarm-clock.svg?raw";
+import brain from "lucide-static/icons/brain.svg?raw";
+import check from "lucide-static/icons/check.svg?raw";
+import copy from "lucide-static/icons/copy.svg?raw";
+import egg from "lucide-static/icons/egg.svg?raw";
+import globe from "lucide-static/icons/globe.svg?raw";
+import heart from "lucide-static/icons/heart.svg?raw";
+import house from "lucide-static/icons/house.svg?raw";
+import keyRound from "lucide-static/icons/key-round.svg?raw";
+import smartphone from "lucide-static/icons/smartphone.svg?raw";
+import apple from "simple-icons/icons/apple.svg?raw";
+import linux from "simple-icons/icons/linux.svg?raw";
+
+export const icons = {
+  "alarm-clock": alarmClock,
+  brain,
+  check,
+  copy,
+  egg,
+  globe,
+  heart,
+  house,
+  "key-round": keyRound,
+  smartphone,
+  apple,
+  linux,
+};
+const brands = new Set(["apple", "linux"]);
+
+interface Props {
+  name: keyof typeof icons;
+  size?: number;
+  class?: string;
+}
+const { name, size = 20, class: className } = Astro.props;
+// Only the outer <svg> is resized; shapes inside keep their own width and height.
+const svg = icons[name]
+  .replace(/<svg[^>]*>/, (tag) =>
+    tag.replace(/\s(width|height)="[^"]*"/g, "").replace(/\sclass="[^"]*"/, ""),
+  )
+  .replace(
+    "<svg",
+    `<svg width="${size}" height="${size}" aria-hidden="true" focusable="false"${
+      brands.has(name) ? ' fill="currentColor"' : ""
+    }`,
+  )
+  .replace(/<title>[^<]*<\/title>/, "");
+---
+
+<span class:list={["icon", className]} set:html={svg} />
+
+<style>
+  .icon {
+    display: inline-flex;
+    flex: none;
+    line-height: 0;
+  }
+</style>

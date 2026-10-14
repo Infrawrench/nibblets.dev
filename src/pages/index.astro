@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import Hamster from "../components/Hamster.astro";
+import Icon from "../components/Icon.astro";
 import logo from "../logo.svg?raw";
 
 const install = "curl -fsSL https://nibblets.dev/install.sh | bash";
@@ -17,34 +18,38 @@ const parade = [
   { name: "nugget", label: "Nugget", city: "Sydney" },
 ];
 
-const features = [
+const features: {
+  icon: "alarm-clock" | "brain" | "key-round" | "house" | "egg" | "smartphone";
+  title: string;
+  text: string;
+}[] = [
   {
-    emoji: "🕰️",
+    icon: "alarm-clock",
     title: "Always on",
     text: "A nibblet is a thread that never really ends. It wakes on a heartbeat, and on schedules it sets for itself.",
   },
   {
-    emoji: "🧠",
+    icon: "brain",
     title: "It remembers",
     text: "Memories live in Postgres with pgvector, so it recalls what matters without you repeating yourself.",
   },
   {
-    emoji: "🔑",
+    icon: "key-round",
     title: "Your subscriptions",
     text: "Runs on Claude Code, Codex or OpenCode, signed in with the plans you already pay for. No API bills.",
   },
   {
-    emoji: "🏡",
+    icon: "house",
     title: "Your machines",
     text: "Each nibblet gets its own little container, with a browser you can watch and take over.",
   },
   {
-    emoji: "🐣",
+    icon: "egg",
     title: "Little helpers",
     text: "Big jobs get split up: a nibblet can hatch sub-agents of its own and hear back when they're done.",
   },
   {
-    emoji: "📱",
+    icon: "smartphone",
     title: "Anywhere",
     text: "Link your computers to Nibblets Connect and check in from your phone, with a nudge when one needs you.",
   },
@@ -74,14 +79,16 @@ const features = [
       </p>
       <div class="ctas">
         <a class="button primary" href={`${repo}/releases/latest`}>
-          <span aria-hidden="true">🍎</span> Get the Mac app
+          <Icon name="apple" /> Get the Mac app
         </a>
         <a class="button" href="https://app.nibblets.dev">
-          <span aria-hidden="true">🌍</span> Open Nibblets Connect
+          <Icon name="globe" /> Open Nibblets Connect
         </a>
       </div>
       <div class="install">
-        <span class="install-label">On a Linux server or VM:</span>
+        <span class="install-label">
+          <Icon name="linux" size={16} /> On a Linux server or VM:
+        </span>
         <div class="command">
           <code>{install}</code>
           <button type="button" class="copy" data-copy={install}>
@@ -113,8 +120,8 @@ const features = [
       <ul>
         {features.map((f) => (
           <li>
-            <span class="emoji" aria-hidden="true">
-              {f.emoji}
+            <span class="emoji">
+              <Icon name={f.icon} size={26} />
             </span>
             <h3>{f.title}</h3>
             <p>{f.text}</p>
@@ -160,8 +167,9 @@ const features = [
   </main>
 
   <footer class="wrap">
-    <span>
-      Made with 🧡 by <a href="https://infrawrench.com">Infrawrench</a>
+    <span class="made">
+      Made with <Icon name="heart" size={16} class="heart" /> by
+      <a href="https://infrawrench.com">Infrawrench</a>
     </span>
     <span>
       <a href={repo}>GitHub</a> · <a href="https://app.nibblets.dev">Nibblets Connect</a>
@@ -173,7 +181,7 @@ const features = [
       button.addEventListener("click", async () => {
         try {
           await navigator.clipboard.writeText(button.dataset.copy ?? "");
-          button.textContent = "Copied 🐹";
+          button.textContent = "Copied!";
         } catch {
           button.textContent = "Select it";
         }
@@ -299,7 +307,9 @@ const features = [
     text-align: left;
   }
   .install-label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 14px;
     font-weight: 700;
     color: var(--faint);
@@ -429,6 +439,7 @@ const features = [
     box-shadow: var(--shadow);
   }
   .emoji {
+    color: var(--fur-deep);
     display: inline-grid;
     place-items: center;
     width: 52px;
@@ -522,6 +533,17 @@ const features = [
     }
   }
 
+  .made {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .made :global(.heart) {
+    color: #e9746a;
+  }
+  .made :global(.heart svg) {
+    fill: currentColor;
+  }
   footer {
     display: flex;
     flex-wrap: wrap;

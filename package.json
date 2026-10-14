@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "astro": "7.3.5",
-    "hono": "4.13.12"
+    "hono": "4.13.12",
+    "lucide-static": "1.49.0",
+    "simple-icons": "16.33.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
