@@ -92,12 +92,12 @@ export function createApp(deps: () => Deps | Promise<Deps>) {
 
   // Releases, laid out like infrawrench.com's: the latest as JSON, and files by tag.
   app.get("/api/latest", async (c) => {
-    const release = await latestRelease(c.env, await deps()).catch(() => null);
+    const release = await latestRelease(await deps()).catch(() => null);
     if (!release) return c.json({ error: "There's no release yet" }, 404);
     return c.json(describe(release), 200, { "cache-control": "public, max-age=300" });
   });
   app.get("/api/download/:tag/:file", async (c) =>
-    download(c.req.param("tag"), c.req.param("file"), c.env, await deps()),
+    download(c.req.param("tag"), c.req.param("file"), await deps()),
   );
 
   // Everything else is the static site.

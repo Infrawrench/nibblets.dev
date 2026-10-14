@@ -5,45 +5,26 @@
  */
 
 export const REPO = "Infrawrench/nibblets";
-const API = `https://api.github.com/repos/${REPO}`;
 /** How long the latest release is remembered before asking GitHub again. */
 const LATEST_SECONDS = 300;
-const LATEST_KEY = "https://nibblets.dev/__cache/latest-release.json";
-
-export interface ReleaseEnv {
-  GITHUB_TOKEN?: string;
-}
+const LATEST_KEY = "https://nibblets.dev/__cache/latest-release-tag";
 
 export interface ReleaseDeps {
   fetch: typeof fetch;
   cache: Pick<Cache, "match" | "put">;
 }
 
-export interface Asset {
-  name: string;
-  size: number;
-  /** github.com's own download address, which isn't rate limited like the API. */
-  downloadUrl: string;
-}
-
 export interface Release {
   tag: string;
   version: string;
-  name: string;
-  notes: string;
   url: string;
-  publishedAt: string | null;
-  assets: Asset[];
 }
 
 /** What /api/latest says: the release, and a link per download. */
 export interface Latest {
   version: string;
   tag: string;
-  name: string;
-  notes: string;
   url: string;
-  publishedAt: string | null;
   downloads: Partial<Record<Platform, string>>;
 }
 
@@ -56,6 +37,18 @@ export type Platform =
   | "linux-arm64-appimage"
   | "linux-x64-deb"
   | "linux-arm64-deb";
+
+/** What every release carries, as the release workflow names it. */
+export const FILES: Record<Platform, string> = {
+  "mac-arm64": "Nibblets-arm64.dmg",
+  "mac-x64": "Nibblets-x64.dmg",
+  "windows-x64": "Nibblets-setup-x64.exe",
+  "windows-arm64": "Nibblets-setup-arm64.exe",
+  "linux-x64-appimage": "Nibblets-x64.AppImage",
+  "linux-arm64-appimage": "Nibblets-arm64.AppImage",
+  "linux-x64-deb": "Nibblets-x64.deb",
+  "linux-arm64-deb": "Nibblets-arm64.deb",
+};
 
 /**
  * Which download a file is, by its name: Nibblets-arm64.dmg,
@@ -73,92 +66,50 @@ export function platformOf(name: string): Platform | null {
   return null;
 }
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
-const str = (v: unknown): string | null => (typeof v === "string" ? v : null);
-
-/** A GitHub release, read carefully: anything malformed is left out rather than trusted. */
-export function parseRelease(body: unknown): Release | null {
-  if (!isRecord(body)) return null;
-  const tag = str(body.tag_name);
-  const url = str(body.html_url);
-  if (!tag || !url || body.draft === true || body.prerelease === true) return null;
-  const assets: Asset[] = [];
-  for (const a of Array.isArray(body.assets) ? body.assets : []) {
-    if (!isRecord(a)) continue;
-    const name = str(a.name);
-    const downloadUrl = str(a.browser_download_url);
-    if (name && downloadUrl) {
-      assets.push({ name, downloadUrl, size: typeof a.size === "number" ? a.size : 0 });
-    }
-  }
-  return {
-    tag,
-    version: tag.replace(/^v/, ""),
-    name: str(body.name) || tag,
-    notes: str(body.body) ?? "",
-    url,
-    publishedAt: str(body.published_at),
-    assets,
-  };
+/**
+ * The tag github.com's /releases/latest redirects to, or null before there's
+ * a release (it redirects to the releases list then). Not the API: Workers
+ * share addresses, so unauthenticated API calls run out of their rate limit.
+ */
+export function tagFromLatestRedirect(location: string | null): string | null {
+  const m = /\/releases\/tag\/([^/?#]+)$/.exec(location ?? "");
+  const tag = m?.[1] ? decodeURIComponent(m[1]) : null;
+  return tag && TAG.test(tag) && tag !== "latest" ? tag : null;
 }
 
-async function github(path: string, env: ReleaseEnv, deps: ReleaseDeps): Promise<unknown> {
-  const res = await deps.fetch(`${API}${path}`, {
-    headers: {
-      accept: "application/vnd.github+json",
-      "user-agent": "nibblets.dev",
-      ...(env.GITHUB_TOKEN ? { authorization: `Bearer ${env.GITHUB_TOKEN}` } : {}),
-    },
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`GitHub said ${res.status}`);
-  return res.json();
-}
+const release = (tag: string): Release => ({
+  tag,
+  version: tag.replace(/^v/, ""),
+  url: `https://github.com/${REPO}/releases/tag/${tag}`,
+});
 
 /** The latest published release, remembered for five minutes. Null before there is one. */
-export async function latestRelease(env: ReleaseEnv, deps: ReleaseDeps): Promise<Release | null> {
+export async function latestRelease(deps: ReleaseDeps): Promise<Release | null> {
   const cached = await deps.cache.match(LATEST_KEY);
-  if (cached) return parseRelease(await cached.json());
-  const body = await github("/releases/latest", env, deps);
-  if (body === null) return null;
+  if (cached) {
+    const tag = tagFromLatestRedirect(`/releases/tag/${await cached.text()}`);
+    return tag ? release(tag) : null;
+  }
+  const res = await deps.fetch(`https://github.com/${REPO}/releases/latest`, {
+    redirect: "manual",
+    headers: { "user-agent": "nibblets.dev" },
+  });
+  const tag = tagFromLatestRedirect(res.headers.get("location"));
+  if (!tag) return null;
   await deps.cache.put(
     LATEST_KEY,
-    new Response(JSON.stringify(body), {
-      headers: {
-        "content-type": "application/json",
-        "cache-control": `max-age=${LATEST_SECONDS}`,
-      },
-    }),
+    new Response(tag, { headers: { "cache-control": `max-age=${LATEST_SECONDS}` } }),
   );
-  return parseRelease(body);
+  return release(tag);
 }
 
-/** A release by its tag (v0.1.0), or the latest one for "latest". */
-export async function releaseFor(
-  tag: string,
-  env: ReleaseEnv,
-  deps: ReleaseDeps,
-): Promise<Release | null> {
-  if (tag === "latest") return latestRelease(env, deps);
-  return parseRelease(await github(`/releases/tags/${encodeURIComponent(tag)}`, env, deps));
-}
-
-export function describe(release: Release): Latest {
+export function describe(r: Release): Latest {
   const downloads: Partial<Record<Platform, string>> = {};
-  for (const asset of release.assets) {
-    const platform = platformOf(asset.name);
-    if (platform) downloads[platform] = `/api/download/${release.tag}/${asset.name}`;
+  for (const [platform, file] of Object.entries(FILES)) {
+    const known = platformOf(file);
+    if (known === platform) downloads[known] = `/api/download/${r.tag}/${file}`;
   }
-  return {
-    version: release.version,
-    tag: release.tag,
-    name: release.name,
-    notes: release.notes,
-    url: release.url,
-    publishedAt: release.publishedAt,
-    downloads,
-  };
+  return { version: r.version, tag: r.tag, url: r.url, downloads };
 }
 
 /** Tags look like v0.1.0 (or v0.1.0-beta.1); "latest" means the newest. */
@@ -174,18 +125,19 @@ const CONTENT_TYPES: Record<string, string> = {
 };
 
 /** Streams one file of a release, as an attachment. */
-export async function download(
-  tag: string,
-  file: string,
-  env: ReleaseEnv,
-  deps: ReleaseDeps,
-): Promise<Response> {
+export async function download(tag: string, file: string, deps: ReleaseDeps): Promise<Response> {
   if (!TAG.test(tag) || !FILE.test(file)) return new Response("Not found", { status: 404 });
-  const release = await releaseFor(tag, env, deps);
-  const asset = release?.assets.find((a) => a.name === file);
+  const resolved = tag === "latest" ? (await latestRelease(deps))?.tag : tag;
+  const res = resolved
+    ? await deps.fetch(
+        `https://github.com/${REPO}/releases/download/${resolved}/${encodeURIComponent(file)}`,
+        { headers: { "user-agent": "nibblets.dev" } },
+      )
+    : null;
   // Nothing released yet, or no such file: the releases page has whatever there is.
-  if (!release || !asset) return Response.redirect(`https://github.com/${REPO}/releases`, 302);
-  const res = await deps.fetch(asset.downloadUrl, { headers: { "user-agent": "nibblets.dev" } });
+  if (!res || res.status === 404) {
+    return Response.redirect(`https://github.com/${REPO}/releases`, 302);
+  }
   if (!res.ok || !res.body) return new Response("Couldn't fetch that file", { status: 502 });
   const ext = file.split(".").pop() ?? "";
   const headers = new Headers({

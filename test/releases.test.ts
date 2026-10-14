@@ -1,30 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createApp, type Deps, type Env } from "../src/app.ts";
-import { parseRelease, platformOf } from "../src/releases.ts";
-
-const RELEASE = {
-  tag_name: "v0.1.0",
-  name: "Nibblets 0.1.0",
-  body: "## What's new",
-  html_url: "https://github.com/Infrawrench/nibblets/releases/tag/v0.1.0",
-  published_at: "2026-10-14T12:00:00Z",
-  draft: false,
-  prerelease: false,
-  assets: [
-    {
-      name: "Nibblets-arm64.dmg",
-      size: 3,
-      browser_download_url:
-        "https://github.com/Infrawrench/nibblets/releases/download/v0.1.0/Nibblets-arm64.dmg",
-    },
-    {
-      name: "Nibblets-x64.dmg",
-      size: 3,
-      browser_download_url:
-        "https://github.com/Infrawrench/nibblets/releases/download/v0.1.0/Nibblets-x64.dmg",
-    },
-  ],
-};
+import { platformOf, tagFromLatestRedirect } from "../src/releases.ts";
 
 function setup(released: boolean) {
   const store = new Map<string, Response>();
@@ -37,10 +13,14 @@ function setup(released: boolean) {
     fetch: async (input) => {
       const url = String(input);
       asked.push(url);
-      if (url.endsWith("/releases/latest") || url.endsWith("/releases/tags/v0.1.0")) {
-        return released ? Response.json(RELEASE) : new Response("{}", { status: 404 });
+      if (url.startsWith("https://api.github.com/")) throw new Error("not the API");
+      if (url === "https://github.com/Infrawrench/nibblets/releases/latest") {
+        const location = released
+          ? "https://github.com/Infrawrench/nibblets/releases/tag/v0.1.0"
+          : "https://github.com/Infrawrench/nibblets/releases";
+        return new Response(null, { status: 302, headers: { location } });
       }
-      if (url.startsWith("https://github.com/") && url.endsWith(".dmg")) {
+      if (released && /\/releases\/download\/v0\.1\.0\/Nibblets-(arm64|x64)\.dmg$/.test(url)) {
         return new Response("dmg", { headers: { "content-length": "3" } });
       }
       return new Response("nope", { status: 404 });
@@ -70,9 +50,12 @@ describe("releases", () => {
     expect(platformOf("Nibblets-arm64.deb")).toBe("linux-arm64-deb");
   });
 
-  it("leaves out drafts and prereleases", () => {
-    expect(parseRelease({ ...RELEASE, draft: true })).toBeNull();
-    expect(parseRelease({ ...RELEASE, prerelease: true })).toBeNull();
+  it("reads the tag from github.com's redirect, and nothing else", () => {
+    const base = "https://github.com/Infrawrench/nibblets/releases";
+    expect(tagFromLatestRedirect(`${base}/tag/v0.1.0`)).toBe("v0.1.0");
+    expect(tagFromLatestRedirect(base)).toBeNull();
+    expect(tagFromLatestRedirect(`${base}/tag/main`)).toBeNull();
+    expect(tagFromLatestRedirect(null)).toBeNull();
   });
 
   it("describes the latest release with a link per download", async () => {
@@ -84,6 +67,8 @@ describe("releases", () => {
       downloads: {
         "mac-arm64": "/api/download/v0.1.0/Nibblets-arm64.dmg",
         "mac-x64": "/api/download/v0.1.0/Nibblets-x64.dmg",
+        "windows-x64": "/api/download/v0.1.0/Nibblets-setup-x64.exe",
+        "linux-x64-appimage": "/api/download/v0.1.0/Nibblets-x64.AppImage",
       },
     });
   });
@@ -121,6 +106,12 @@ describe("releases", () => {
     const res = await get("/api/download/latest/Nibblets-arm64.dmg");
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe("https://github.com/Infrawrench/nibblets/releases");
+  });
+
+  it("sends people to the releases page for a file the release doesn't have", async () => {
+    const { get } = setup(true);
+    const res = await get("/api/download/v0.1.0/Nibblets-arm64.zip");
+    expect(res.status).toBe(302);
   });
 
   it("refuses odd tags and file names", async () => {
