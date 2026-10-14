@@ -1,0 +1,88 @@
+---
+import Legal from "../layouts/Legal.astro";
+---
+
+<Legal title="Privacy policy" updated="14 October 2026">
+  <p>
+    Nibblets is made by Infrawrench LLC ("we"). This policy covers this website, the Nibblets apps,
+    and Nibblets Connect at <a href="https://app.nibblets.dev">app.nibblets.dev</a>.
+  </p>
+
+  <h2>Your nibblets stay on your computers</h2>
+  <p>
+    Nibblets is software you run yourself. Your nibblets, their conversations, memories, files,
+    schedules, and the logins you share with them live on the computers you run them on. We don't
+    receive any of it, and we have no way in.
+  </p>
+  <p>
+    Your nibblets talk to the AI providers you choose (such as Anthropic, OpenAI, or the providers
+    you set up in OpenCode) using your own subscriptions or keys, and to whatever websites and tools
+    you let them use. Those services handle that data under their own terms and policies, not ours.
+  </p>
+
+  <h2>Nibblets Connect</h2>
+  <p>
+    Connect is optional. It lists the computers you've linked to your account and hands out
+    short-lived credentials so your browser can talk to each one directly. To do that, it keeps:
+  </p>
+  <ul>
+    <li>
+      <strong>Your account:</strong> your name, email address, and sign-in details, held by our
+      sign-in provider, Clerk. If you sign in with Google, Google tells Clerk your name, email
+      address, and profile picture.
+    </li>
+    <li>
+      <strong>Your linked computers:</strong> the name, hostname, and operating system you link, the
+      Nibblets version and how many nibblets it runs, the addresses it can be reached on (local
+      network, Tailscale, and tunnel addresses), when it last checked in, and the IP address and
+      rough location it was linked from.
+    </li>
+    <li>
+      <strong>Notifications, if you turn them on:</strong> each device's push subscription and a
+      label for it. When a nibblet needs you, its computer sends the notification's title and text
+      through Connect to your browser's push service (run by Apple, Google, or Mozilla, say).
+    </li>
+  </ul>
+  <p>
+    Connect isn't in the way of your nibblets' data: your browser reaches your computers directly.
+    If you use a Cloudflare tunnel to reach a computer from anywhere, that traffic passes through
+    Cloudflare's network.
+  </p>
+
+  <h2>This website and the apps</h2>
+  <p>
+    This website has no analytics or advertising and sets no cookies. Like any website, our host
+    (Cloudflare) sees your IP address and the pages you request, and the site's fonts come from
+    Google Fonts. Downloads and update checks go to GitHub, where our releases are published.
+  </p>
+
+  <h2>Who handles data for us</h2>
+  <ul>
+    <li>Cloudflare: hosting, the Connect database, DNS, and tunnels.</li>
+    <li>Clerk: accounts and sign-in.</li>
+    <li>Google: sign-in with Google, if you choose it.</li>
+    <li>GitHub: downloads and updates.</li>
+    <li>Your browser's push service: notifications, if you turn them on.</li>
+  </ul>
+  <p>We don't sell your data or use it for advertising.</p>
+
+  <h2>How long we keep it</h2>
+  <p>
+    A linked computer's details are kept until you remove it from your account, or unlink it on the
+    computer itself. Push subscriptions are kept until you turn notifications off on that device.
+    Your account is kept until you ask us to delete it, which deletes everything above.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    You can ask us for a copy of what we hold about you, to correct it, or to delete it, by emailing
+    <a href="mailto:astrid@infrawrench.com">astrid@infrawrench.com</a>. Depending on where you live,
+    you may also have the right to complain to your data protection authority.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    If we change this policy, we'll update the date at the top. If a change matters, we'll say so in
+    the app or by email first.
+  </p>
+</Legal>

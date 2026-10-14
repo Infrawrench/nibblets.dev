@@ -1,0 +1,89 @@
+---
+import Base from "./Base.astro";
+import Hamster from "../components/Hamster.astro";
+
+interface Props {
+  title: string;
+  updated: string;
+}
+const { title, updated } = Astro.props;
+---
+
+<Base title={`${title} · Nibblets`}>
+  <main class="wrap legal">
+    <a class="home" href="/">
+      <Hamster name="pip" size={44} />
+      <span>Nibblets</span>
+    </a>
+    <h1>{title}</h1>
+    <p class="updated">Last updated {updated}</p>
+    <article>
+      <slot />
+    </article>
+    <footer>
+      <a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of service</a> ·
+      <a href="/">Home</a>
+    </footer>
+  </main>
+</Base>
+
+<style>
+  .legal {
+    max-width: 760px;
+    padding: 32px 0 48px;
+  }
+  .home {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+    font:
+      600 22px Fredoka,
+      ui-rounded,
+      system-ui,
+      sans-serif;
+    text-decoration: none;
+  }
+  h1 {
+    margin: 28px 0 4px;
+    font:
+      700 clamp(30px, 5vw, 42px) / 1.15 Fredoka,
+      ui-rounded,
+      system-ui,
+      sans-serif;
+  }
+  .updated {
+    margin: 0 0 24px;
+    color: var(--faint);
+  }
+  article {
+    padding: 8px 28px 20px;
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: var(--shadow);
+  }
+  article :global(h2) {
+    margin: 28px 0 8px;
+    font:
+      600 22px/1.3 Fredoka,
+      ui-rounded,
+      system-ui,
+      sans-serif;
+  }
+  article :global(ul) {
+    padding-left: 22px;
+  }
+  article :global(li) {
+    margin: 4px 0;
+  }
+  footer {
+    margin-top: 28px;
+    color: var(--faint);
+    font-size: 15px;
+  }
+  @media (max-width: 560px) {
+    article {
+      padding: 4px 18px 16px;
+    }
+  }
+</style>
