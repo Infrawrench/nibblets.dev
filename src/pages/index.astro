@@ -6,6 +6,9 @@ import logo from "../logo.svg?raw";
 
 const install = "curl -fsSL https://nibblets.dev/install.sh | bash";
 const repo = "https://github.com/Infrawrench/nibblets";
+// Straight to the file, through the Worker (src/releases.ts): no JavaScript needed.
+const macArm = "/api/download/latest/Nibblets-arm64.dmg";
+const macIntel = "/api/download/latest/Nibblets-x64.dmg";
 
 const parade = [
   { name: "pip", label: "Pip", city: "London" },
@@ -78,13 +81,19 @@ const features: {
         subscriptions you already have, remember things, and get on with work while you're away.
       </p>
       <div class="ctas">
-        <a class="button primary" href={`${repo}/releases/latest`}>
+        <a class="button primary" href={macArm} download>
           <Icon name="apple" /> Get the Mac app
         </a>
         <a class="button" href="https://app.nibblets.dev">
           <Icon name="globe" /> Open Nibblets Connect
         </a>
       </div>
+      <p class="mac-note">
+        <span data-version>For Apple Silicon</span> ·
+        <a href={macIntel} download>
+          Intel Mac?
+        </a>
+      </p>
       <div class="install">
         <span class="install-label">
           <Icon name="linux" size={16} /> On a Linux server or VM:
@@ -177,8 +186,11 @@ const features: {
           <span class="step">1</span>
           <h3>Install it</h3>
           <p>
-            The <a href={`${repo}/releases/latest`}>Mac app</a> walks you through Docker and your
-            agents. On Linux, it's the one command above.
+            The{" "}
+            <a href={macArm} download>
+              Mac app
+            </a>{" "}
+            walks you through Docker and your agents. On Linux, it's the one command above.
           </p>
         </li>
         <li>
@@ -217,6 +229,22 @@ const features: {
   </footer>
 
   <script>
+    // Name the version once it's known; the links work without this.
+    fetch("/api/latest")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((latest: unknown) => {
+        const label = document.querySelector("[data-version]");
+        const version =
+          typeof latest === "object" &&
+          latest !== null &&
+          "version" in latest &&
+          typeof latest.version === "string"
+            ? latest.version
+            : null;
+        if (label && version) label.textContent = `Version ${version}, for Apple Silicon`;
+      })
+      .catch(() => undefined);
+
     for (const button of document.querySelectorAll<HTMLButtonElement>("button[data-copy]")) {
       button.addEventListener("click", async () => {
         try {
@@ -340,6 +368,15 @@ const features: {
     background: var(--fur);
     border-color: var(--fur-deep);
     color: #3b2412;
+  }
+  .mac-note {
+    margin: 12px 0 0;
+    font-size: 14px;
+    color: var(--faint);
+  }
+  .mac-note a {
+    color: var(--dim);
+    font-weight: 700;
   }
   .install {
     margin-top: 30px;

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { describe, download, latestRelease } from "./releases.ts";
 
 export interface Env {
   ASSETS: Fetcher;
@@ -88,6 +89,16 @@ export function createApp(deps: () => Deps | Promise<Deps>) {
   });
 
   app.get("/install.sh", async (c) => installer(c.env, await deps()));
+
+  // Releases, laid out like infrawrench.com's: the latest as JSON, and files by tag.
+  app.get("/api/latest", async (c) => {
+    const release = await latestRelease(c.env, await deps()).catch(() => null);
+    if (!release) return c.json({ error: "There's no release yet" }, 404);
+    return c.json(describe(release), 200, { "cache-control": "public, max-age=300" });
+  });
+  app.get("/api/download/:tag/:file", async (c) =>
+    download(c.req.param("tag"), c.req.param("file"), c.env, await deps()),
+  );
 
   // Everything else is the static site.
   app.all("*", (c) => c.env.ASSETS.fetch(c.req.raw));
