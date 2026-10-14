@@ -1,0 +1,31 @@
+{
+  "name": "nibblets.dev",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "packageManager": "pnpm@12.11.2",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro build && wrangler dev",
+    "deploy": "astro build && wrangler deploy",
+    "typecheck": "astro check",
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "astro": "7.3.5",
+    "hono": "4.13.12"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@cloudflare/workers-types": "^5.20261013.1",
+    "prettier": "3.9.10",
+    "prettier-plugin-astro": "^1.1.1",
+    "typescript": "6.0.3",
+    "vitest": "5.0.4",
+    "wrangler": "4.150.0"
+  }
+}

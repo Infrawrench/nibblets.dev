@@ -1,0 +1,121 @@
+---
+// One of the hamsters in src/hamsters, drawn by Nibblets' own Hamster
+// component and saved as SVG. Inlined, so the app's animations apply.
+const files = import.meta.glob<string>("../hamsters/*.svg", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+
+interface Props {
+  name: string;
+  /** "idle" blinks; "working" bobs and nibbles; "sleeping" breathes and snores. */
+  mood?: "idle" | "working" | "sleeping";
+  size?: number;
+  class?: string;
+}
+const { name, mood = "idle", size = 120, class: className } = Astro.props;
+const svg = files[`../hamsters/${name}.svg`];
+if (!svg) throw new Error(`No hamster called ${name}`);
+const moodClass = mood === "sleeping" ? "hamster-stopped" : `hamster-${mood}`;
+const html = svg
+  .replace(/class="hamster[^"]*"/, `class="hamster ${moodClass}"`)
+  .replace(/width="\d+" height="\d+"/, `width="${size}" height="${size}"`)
+  .replace(/<title>[^<]*<\/title>/, "")
+  .replace("<svg ", '<svg aria-hidden="true" ')
+  // Each was drawn alone, so their ids match; make them this hamster's own.
+  .replace(/id="([^"]+)"/g, `id="$1-${name}"`)
+  .replace(/url\(#([^)]+)\)/g, `url(#$1-${name})`);
+---
+
+<span class:list={["hamster-wrap", className]} set:html={html} />
+
+<style is:global>
+  .hamster-wrap {
+    display: inline-flex;
+    line-height: 0;
+  }
+  .hamster-wrap svg {
+    max-width: 100%;
+    height: auto;
+  }
+  /* The app's own hamster animations. */
+  @keyframes hamster-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-2.5%);
+    }
+  }
+  @keyframes hamster-nibble {
+    0%,
+    100% {
+      transform: scaleY(1);
+    }
+    50% {
+      transform: scaleY(0.6);
+    }
+  }
+  @keyframes hamster-blink {
+    0%,
+    92%,
+    100% {
+      transform: scaleY(1);
+    }
+    95% {
+      transform: scaleY(0.1);
+    }
+  }
+  @keyframes hamster-zzz {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0) scale(0.7);
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(6%, -14%) scale(1.1);
+    }
+  }
+  @keyframes hamster-breathe {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.015, 0.985);
+    }
+  }
+  .hamster-working .hamster-body {
+    animation: hamster-bob 0.5s ease-in-out infinite;
+    transform-origin: 50% 90%;
+  }
+  .hamster-working .hamster-mouth {
+    animation: hamster-nibble 0.25s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+  }
+  .hamster-idle .hamster-eye {
+    animation: hamster-blink 5s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .hamster-stopped .hamster-body {
+    animation: hamster-breathe 3.5s ease-in-out infinite;
+    transform-origin: 50% 90%;
+  }
+  .hamster-stopped .hamster-z {
+    animation: hamster-zzz 3s ease-in-out infinite;
+    transform-box: fill-box;
+  }
+  .hamster-stopped .hamster-z:nth-of-type(2) {
+    animation-delay: 1s;
+  }
+  .hamster-stopped .hamster-z:nth-of-type(3) {
+    animation-delay: 2s;
+  }
+</style>

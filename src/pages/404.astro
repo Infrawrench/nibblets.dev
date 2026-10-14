@@ -1,0 +1,35 @@
+---
+import Base from "../layouts/Base.astro";
+import Hamster from "../components/Hamster.astro";
+---
+
+<Base title="Not found · Nibblets">
+  <main class="wrap lost">
+    <Hamster name="sleepy" size={180} mood="sleeping" />
+    <h1>This page has wandered off</h1>
+    <p>It's probably asleep in a toilet roll somewhere.</p>
+    <a href="/">Back home 🏡</a>
+  </main>
+</Base>
+
+<style>
+  .lost {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 42px);
+  }
+  p {
+    margin: 0 0 8px;
+    color: var(--dim);
+  }
+  a {
+    font-weight: 700;
+  }
+</style>

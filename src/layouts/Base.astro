@@ -1,0 +1,103 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = "Nibblets: little agents that live on your own computers",
+  description = "Self-hosted, always-on agents, each one a hamster you dress up yourself. They run on the Claude and ChatGPT subscriptions you already have.",
+} = Astro.props;
+const image = new URL("/og-icon.png", Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#DCEBFA" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:url" content={Astro.url} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap"
+    />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light;
+    --sky-top: #dcebfa;
+    --sky-bottom: #f6f9fd;
+    --cream: #fffaf2;
+    --card: #ffffff;
+    --ink: #2b2a33;
+    --dim: #5e6070;
+    --faint: #8c8fa0;
+    --line: #e7e2d8;
+    --fur: #e9a95e;
+    --fur-deep: #c2803a;
+    --blush: #f4afb4;
+    --blue: #3a74c4;
+    --blue-soft: #cfe1f5;
+    --code: #2b2a33;
+    --radius: 22px;
+    --shadow: 0 10px 30px rgb(58 116 196 / 0.12), 0 2px 6px rgb(43 42 51 / 0.06);
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background:
+      linear-gradient(180deg, var(--sky-top) 0, var(--sky-bottom) 720px) no-repeat,
+      var(--sky-bottom);
+    color: var(--ink);
+    font:
+      17px/1.6 Nunito,
+      ui-rounded,
+      system-ui,
+      sans-serif;
+    overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: Fredoka, ui-rounded, system-ui, sans-serif;
+    line-height: 1.15;
+    margin: 0;
+  }
+  a {
+    color: var(--blue);
+  }
+  .wrap {
+    width: min(1080px, 100% - 32px);
+    margin-inline: auto;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>

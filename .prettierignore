@@ -1,0 +1,5 @@
+pnpm-lock.yaml
+dist
+.astro
+src/hamsters
+src/logo.svg

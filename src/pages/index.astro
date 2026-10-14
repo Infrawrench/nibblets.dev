@@ -1,0 +1,535 @@
+---
+import Base from "../layouts/Base.astro";
+import Hamster from "../components/Hamster.astro";
+import logo from "../logo.svg?raw";
+
+const install = "curl -fsSL https://nibblets.dev/install.sh | bash";
+const repo = "https://github.com/Infrawrench/nibblets";
+
+const parade = [
+  { name: "pip", label: "Pip", city: "London" },
+  { name: "mochi", label: "Mochi", city: "Tokyo" },
+  { name: "biscuit", label: "Biscuit", city: "Paris" },
+  { name: "toffee", label: "Toffee", city: "Newcastle" },
+  { name: "bean", label: "Bean", city: "San Francisco" },
+  { name: "pickle", label: "Pickle", city: "Brighton" },
+  { name: "sprout", label: "Sprout", city: "New York" },
+  { name: "nugget", label: "Nugget", city: "Sydney" },
+];
+
+const features = [
+  {
+    emoji: "🕰️",
+    title: "Always on",
+    text: "A nibblet is a thread that never really ends. It wakes on a heartbeat, and on schedules it sets for itself.",
+  },
+  {
+    emoji: "🧠",
+    title: "It remembers",
+    text: "Memories live in Postgres with pgvector, so it recalls what matters without you repeating yourself.",
+  },
+  {
+    emoji: "🔑",
+    title: "Your subscriptions",
+    text: "Runs on Claude Code, Codex or OpenCode, signed in with the plans you already pay for. No API bills.",
+  },
+  {
+    emoji: "🏡",
+    title: "Your machines",
+    text: "Each nibblet gets its own little container, with a browser you can watch and take over.",
+  },
+  {
+    emoji: "🐣",
+    title: "Little helpers",
+    text: "Big jobs get split up: a nibblet can hatch sub-agents of its own and hear back when they're done.",
+  },
+  {
+    emoji: "📱",
+    title: "Anywhere",
+    text: "Link your computers to Nibblets Connect and check in from your phone, with a nudge when one needs you.",
+  },
+];
+---
+
+<Base>
+  <header class="wrap top">
+    <a class="brand" href="/">
+      <img src="/favicon.svg" alt="" width="34" height="34" />
+      Nibblets
+    </a>
+    <nav>
+      <a href="#what">What they do</a>
+      <a href="#start">Get started</a>
+      <a href={repo}>GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="wrap hero">
+      <div class="logo" set:html={logo} />
+      <h1>Little agents that live on your own computers</h1>
+      <p class="lede">
+        Each nibblet is a hamster you dress up yourself. They use the Claude and ChatGPT
+        subscriptions you already have, remember things, and get on with work while you're away.
+      </p>
+      <div class="ctas">
+        <a class="button primary" href={`${repo}/releases/latest`}>
+          <span aria-hidden="true">🍎</span> Get the Mac app
+        </a>
+        <a class="button" href="https://app.nibblets.dev">
+          <span aria-hidden="true">🌍</span> Open Nibblets Connect
+        </a>
+      </div>
+      <div class="install">
+        <span class="install-label">On a Linux server or VM:</span>
+        <div class="command">
+          <code>{install}</code>
+          <button type="button" class="copy" data-copy={install}>
+            Copy
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="parade" aria-label="Some nibblets">
+      <div class="parade-track">
+        {[...parade, ...parade].map((h, i) => (
+          <figure aria-hidden={i >= parade.length ? "true" : undefined}>
+            <Hamster name={h.name} size={128} mood={i % 3 === 1 ? "working" : "idle"} />
+            <figcaption>
+              <strong>{h.label}</strong>
+              <span>{h.city}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <p class="wrap parade-note">
+        Pick their fur, ears, face, piercings, hats, and a city to live in.
+      </p>
+    </section>
+
+    <section class="wrap features" id="what">
+      <h2>What they do</h2>
+      <ul>
+        {features.map((f) => (
+          <li>
+            <span class="emoji" aria-hidden="true">
+              {f.emoji}
+            </span>
+            <h3>{f.title}</h3>
+            <p>{f.text}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="wrap start" id="start">
+      <h2>Get started</h2>
+      <ol>
+        <li>
+          <span class="step">1</span>
+          <h3>Install it</h3>
+          <p>
+            The <a href={`${repo}/releases/latest`}>Mac app</a> walks you through Docker and your
+            agents. On Linux, it's the one command above.
+          </p>
+        </li>
+        <li>
+          <span class="step">2</span>
+          <h3>Sign in to an agent</h3>
+          <p>Claude Code, Codex or OpenCode. Your nibblets share the login, never the password.</p>
+        </li>
+        <li>
+          <span class="step">3</span>
+          <h3>Make a nibblet</h3>
+          <p>Dress up a hamster, give it a job, and let it get on with things.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="wrap free">
+      <Hamster name="toffee" size={96} mood="working" />
+      <div>
+        <h2>Free, and yours</h2>
+        <p>
+          Nibblets is free software under the GPL-2.0. It runs on your own computers, and you can{" "}
+          <a href={repo}>read every line of it on GitHub</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <span>
+      Made with 🧡 by <a href="https://infrawrench.com">Infrawrench</a>
+    </span>
+    <span>
+      <a href={repo}>GitHub</a> · <a href="https://app.nibblets.dev">Nibblets Connect</a>
+    </span>
+  </footer>
+
+  <script>
+    for (const button of document.querySelectorAll<HTMLButtonElement>("button[data-copy]")) {
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(button.dataset.copy ?? "");
+          button.textContent = "Copied 🐹";
+        } catch {
+          button.textContent = "Select it";
+        }
+        setTimeout(() => (button.textContent = "Copy"), 1800);
+      });
+    }
+  </script>
+</Base>
+
+<style>
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 0;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font:
+      600 22px Fredoka,
+      ui-rounded,
+      system-ui,
+      sans-serif;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .brand img {
+    border-radius: 9px;
+  }
+  nav {
+    display: flex;
+    gap: 22px;
+    font-weight: 700;
+  }
+  nav a {
+    color: var(--dim);
+    text-decoration: none;
+  }
+  nav a:hover {
+    color: var(--ink);
+  }
+  @media (max-width: 640px) {
+    nav a:not(:last-child) {
+      display: none;
+    }
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 0 40px;
+  }
+  .logo {
+    width: min(220px, 52vw);
+    margin-bottom: 8px;
+    animation: float 5s ease-in-out infinite;
+    filter: drop-shadow(0 18px 24px rgb(58 116 196 / 0.22));
+  }
+  .logo :global(svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-1deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(1deg);
+    }
+  }
+  h1 {
+    font-size: clamp(34px, 6vw, 58px);
+    font-weight: 700;
+    max-width: 14ch;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    max-width: 38rem;
+    color: var(--dim);
+    font-size: 19px;
+    margin: 16px 0 26px;
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+    border: 2px solid var(--line);
+    box-shadow: var(--shadow);
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .button:hover {
+    transform: translateY(-2px) rotate(-0.5deg);
+  }
+  .button.primary {
+    background: var(--fur);
+    border-color: var(--fur-deep);
+    color: #3b2412;
+  }
+  .install {
+    margin-top: 30px;
+    width: min(100%, 560px);
+    text-align: left;
+  }
+  .install-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--faint);
+    margin: 0 0 6px 6px;
+  }
+  .command {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 8px 18px;
+    background: var(--code);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+  .command code {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    color: #f3ece0;
+    font:
+      15px/1.4 ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      monospace;
+    padding: 6px 0;
+  }
+  @media (max-width: 560px) {
+    /* Wrapped, so the whole command shows, | bash and all. */
+    .command code {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+  .copy {
+    flex: none;
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 14px;
+    background: var(--blush);
+    color: #4a2025;
+    font:
+      700 14px Nunito,
+      system-ui,
+      sans-serif;
+    cursor: pointer;
+  }
+
+  .parade {
+    padding: 28px 0 8px;
+    overflow: hidden;
+  }
+  .parade-track {
+    display: flex;
+    gap: 22px;
+    width: max-content;
+    animation: march 60s linear infinite;
+  }
+  .parade:hover .parade-track {
+    animation-play-state: paused;
+  }
+  @keyframes march {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 14px 12px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  figure:nth-child(odd) {
+    transform: rotate(-2deg);
+  }
+  figure:nth-child(even) {
+    transform: rotate(2deg) translateY(10px);
+  }
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.2;
+  }
+  figcaption strong {
+    font:
+      600 18px Fredoka,
+      ui-rounded,
+      system-ui,
+      sans-serif;
+  }
+  figcaption span {
+    font-size: 13px;
+    color: var(--faint);
+  }
+  .parade-note {
+    text-align: center;
+    color: var(--dim);
+    margin-top: 26px;
+  }
+
+  section h2 {
+    font-size: clamp(28px, 4vw, 38px);
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .features {
+    padding: 56px 0 24px;
+  }
+  .features ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 18px;
+  }
+  .features li {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+  }
+  .emoji {
+    display: inline-grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: var(--cream);
+    border: 2px solid var(--line);
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+  .features h3 {
+    font-size: 21px;
+    margin-bottom: 6px;
+  }
+  .features p {
+    margin: 0;
+    color: var(--dim);
+  }
+
+  .start {
+    padding: 56px 0 24px;
+  }
+  .start ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 18px;
+  }
+  .start li {
+    position: relative;
+    padding: 30px 24px 22px;
+    background: var(--cream);
+    border: 2px dashed #e6d6bc;
+    border-radius: var(--radius);
+  }
+  .step {
+    position: absolute;
+    top: -18px;
+    left: 22px;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--fur);
+    border: 3px solid var(--fur-deep);
+    color: #3b2412;
+    font:
+      700 18px Fredoka,
+      ui-rounded,
+      system-ui,
+      sans-serif;
+  }
+  .start h3 {
+    font-size: 21px;
+    margin-bottom: 6px;
+  }
+  .start p {
+    margin: 0;
+    color: var(--dim);
+  }
+
+  .free {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin: 56px auto 40px;
+    padding: 24px 28px;
+    background: var(--blue-soft);
+    border-radius: var(--radius);
+    max-width: 760px;
+  }
+  .free h2 {
+    text-align: left;
+    margin-bottom: 4px;
+    font-size: 26px;
+  }
+  .free p {
+    margin: 0;
+    color: var(--dim);
+  }
+  @media (max-width: 560px) {
+    .free {
+      flex-direction: column;
+      text-align: center;
+    }
+    .free h2 {
+      text-align: center;
+    }
+  }
+
+  footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 28px 0 40px;
+    border-top: 2px dotted var(--line);
+    color: var(--faint);
+    font-size: 15px;
+  }
+</style>
