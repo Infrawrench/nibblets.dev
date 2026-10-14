@@ -112,6 +112,49 @@ const features: {
       </div>
     </section>
 
+    <section class="wrap peek" aria-labelledby="peek">
+      <h2 id="peek">A peek inside</h2>
+      <figure class="window">
+        <div class="window-bar" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <img
+          src="/screens/chat.webp"
+          width="2880"
+          height="1800"
+          loading="lazy"
+          alt="Pip's chat: it's sent a sub-agent to compare flights to Lisbon, with what it remembers about you alongside"
+        />
+        <figcaption>Chat with a nibblet, watch it work, and see what it remembers.</figcaption>
+      </figure>
+      <div class="peek-row">
+        <figure class="card-shot">
+          <img
+            src="/screens/dress-up.webp"
+            width="1440"
+            height="986"
+            loading="lazy"
+            alt="Making a nibblet: choosing a hamster's eyes, eye colour and mouth"
+          />
+          <figcaption>Dress up each hamster just how you like.</figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="phone-frame">
+            <img
+              src="/screens/phone.webp"
+              width="780"
+              height="1688"
+              loading="lazy"
+              alt="Pip's chat on a phone"
+            />
+          </div>
+          <figcaption>Check in from your phone.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <section class="wrap features" id="what">
       <h2>What they do</h2>
       <ul>
@@ -373,7 +416,7 @@ const features: {
       transform: translateX(-50%);
     }
   }
-  figure {
+  .parade figure {
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -384,28 +427,101 @@ const features: {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
   }
-  figure:nth-child(odd) {
+  .parade figure:nth-child(odd) {
     transform: rotate(-2deg);
   }
-  figure:nth-child(even) {
+  .parade figure:nth-child(even) {
     transform: rotate(2deg) translateY(10px);
   }
-  figcaption {
+  .parade figcaption {
     display: flex;
     flex-direction: column;
     align-items: center;
     line-height: 1.2;
   }
-  figcaption strong {
+  .parade figcaption strong {
     font:
       600 18px Fredoka,
       ui-rounded,
       system-ui,
       sans-serif;
   }
-  figcaption span {
+  .parade figcaption span {
     font-size: 13px;
     color: var(--faint);
+  }
+
+  .peek {
+    padding: 48px 0 8px;
+  }
+  .peek figure {
+    margin: 0;
+  }
+  .peek img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .peek figcaption {
+    margin-top: 12px;
+    text-align: center;
+    color: var(--dim);
+    font-weight: 600;
+  }
+  .window {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    padding-bottom: 16px;
+  }
+  .window img {
+    border-bottom: 1px solid var(--line);
+  }
+  .window-bar {
+    display: flex;
+    gap: 7px;
+    padding: 12px 14px;
+    background: #f1ede6;
+  }
+  .window-bar span {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #f4afb4;
+  }
+  .window-bar span:nth-child(2) {
+    background: #f6d38a;
+  }
+  .window-bar span:nth-child(3) {
+    background: #a9d8a1;
+  }
+  .peek-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+    align-items: center;
+    gap: 28px;
+    margin-top: 28px;
+  }
+  .card-shot img {
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .phone-frame {
+    width: min(100%, 260px);
+    margin: 0 auto;
+    padding: 10px;
+    border-radius: 42px;
+    background: var(--ink);
+    box-shadow: var(--shadow);
+  }
+  .phone-frame img {
+    border-radius: 32px;
+  }
+  @media (max-width: 760px) {
+    .peek-row {
+      grid-template-columns: 1fr;
+    }
   }
 
   section h2 {
