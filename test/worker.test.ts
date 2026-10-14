@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createApp, INSTALLER_URL, UNAVAILABLE, type Deps, type Env } from "../src/app.ts";
+import { createApp, INSTALLER_URL, ranged, UNAVAILABLE, type Deps, type Env } from "../src/app.ts";
 
 const SCRIPT = "#!/usr/bin/env bash\necho hamsters\n";
 
@@ -95,5 +95,52 @@ describe("the nibblets.dev worker", () => {
     const { get } = setup(() => new Response(SCRIPT));
     expect(await (await get("/")).text()).toBe("asset /");
     expect(await (await get("/favicon.svg")).text()).toBe("asset /favicon.svg");
+  });
+
+  describe("range requests, so the song can be seeked", () => {
+    const song = () =>
+      new Response(new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]), {
+        headers: { "content-type": "audio/mpeg" },
+      });
+    const ask = (range?: string) =>
+      new Request("https://nibblets.dev/nibblets-of-kernow.mp3", {
+        headers: range ? { range } : {},
+      });
+
+    it("sends the bytes asked for", async () => {
+      const res = await ranged(ask("bytes=2-5"), song());
+      expect(res.status).toBe(206);
+      expect(res.headers.get("content-range")).toBe("bytes 2-5/10");
+      expect(res.headers.get("content-length")).toBe("4");
+      expect([...new Uint8Array(await res.arrayBuffer())]).toEqual([2, 3, 4, 5]);
+    });
+
+    it("sends the rest, or the last few, when that's what's asked", async () => {
+      const rest = await ranged(ask("bytes=7-"), song());
+      expect([...new Uint8Array(await rest.arrayBuffer())]).toEqual([7, 8, 9]);
+      const last = await ranged(ask("bytes=-2"), song());
+      expect(last.headers.get("content-range")).toBe("bytes 8-9/10");
+      expect([...new Uint8Array(await last.arrayBuffer())]).toEqual([8, 9]);
+    });
+
+    it("says what it can't send", async () => {
+      const res = await ranged(ask("bytes=20-"), song());
+      expect(res.status).toBe(416);
+      expect(res.headers.get("content-range")).toBe("bytes */10");
+    });
+
+    it("sends the whole song, saying it takes ranges, when none is asked", async () => {
+      const res = await ranged(ask(), song());
+      expect(res.status).toBe(200);
+      expect(res.headers.get("accept-ranges")).toBe("bytes");
+      expect((await res.arrayBuffer()).byteLength).toBe(10);
+    });
+
+    it("leaves pages alone", async () => {
+      const page = new Response("<h1>hi</h1>", { headers: { "content-type": "text/html" } });
+      const res = await ranged(ask("bytes=0-1"), page);
+      expect(res.status).toBe(200);
+      expect(await res.text()).toBe("<h1>hi</h1>");
+    });
   });
 });

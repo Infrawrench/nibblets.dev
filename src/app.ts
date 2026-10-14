@@ -101,6 +101,32 @@ export function createApp(deps: () => Deps | Promise<Deps>) {
   );
 
   // Everything else is the static site.
-  app.all("*", (c) => c.env.ASSETS.fetch(c.req.raw));
+  app.all("*", async (c) => ranged(c.req.raw, await c.env.ASSETS.fetch(c.req.raw)));
   return app;
+}
+
+/**
+ * Answers a range request for audio or video, which the static assets don't: without it, a
+ * browser can't seek in the singalong's song.
+ */
+export async function ranged(req: Request, res: Response): Promise<Response> {
+  const type = res.headers.get("content-type") ?? "";
+  if (res.status !== 200 || !/^(audio|video)\//.test(type)) return res;
+  const headers = new Headers(res.headers);
+  headers.set("accept-ranges", "bytes");
+  const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get("range") ?? "");
+  if (!range || (!range[1] && !range[2])) return new Response(res.body, { status: 200, headers });
+  const body = new Uint8Array(await res.arrayBuffer());
+  const size = body.length;
+  // "bytes=a-b", "bytes=a-" (to the end), or "bytes=-n" (the last n)
+  const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
+  const end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+  if (start >= size || start > end) {
+    headers.set("content-range", `bytes */${size}`);
+    headers.delete("content-length");
+    return new Response(null, { status: 416, headers });
+  }
+  headers.set("content-range", `bytes ${start}-${end}/${size}`);
+  headers.set("content-length", String(end - start + 1));
+  return new Response(body.slice(start, end + 1), { status: 206, headers });
 }
