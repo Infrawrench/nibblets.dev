@@ -64,6 +64,10 @@ describe("releases", () => {
     expect(platformOf("Nibblets-arm64.dmg")).toBe("mac-arm64");
     expect(platformOf("Nibblets-x64.dmg")).toBe("mac-x64");
     expect(platformOf("Nibblets-arm64.zip")).toBeNull();
+    expect(platformOf("Nibblets-setup-x64.exe")).toBe("windows-x64");
+    expect(platformOf("Nibblets-setup-arm64.exe")).toBe("windows-arm64");
+    expect(platformOf("Nibblets-x64.AppImage")).toBe("linux-x64-appimage");
+    expect(platformOf("Nibblets-arm64.deb")).toBe("linux-arm64-deb");
   });
 
   it("leaves out drafts and prereleases", () => {

@@ -12,6 +12,8 @@ import keyRound from "lucide-static/icons/key-round.svg?raw";
 import smartphone from "lucide-static/icons/smartphone.svg?raw";
 import apple from "simple-icons/icons/apple.svg?raw";
 import linux from "simple-icons/icons/linux.svg?raw";
+// Simple Icons dropped Microsoft's logos at Microsoft's request; it's four squares.
+import windows from "./windows.svg?raw";
 
 export const icons = {
   "alarm-clock": alarmClock,
@@ -26,8 +28,9 @@ export const icons = {
   smartphone,
   apple,
   linux,
+  windows,
 };
-const brands = new Set(["apple", "linux"]);
+const brands = new Set(["apple", "linux", "windows"]);
 
 interface Props {
   name: keyof typeof icons;

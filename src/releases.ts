@@ -47,13 +47,29 @@ export interface Latest {
   downloads: Partial<Record<Platform, string>>;
 }
 
-export type Platform = "mac-arm64" | "mac-x64";
+export type Platform =
+  | "mac-arm64"
+  | "mac-x64"
+  | "windows-x64"
+  | "windows-arm64"
+  | "linux-x64-appimage"
+  | "linux-arm64-appimage"
+  | "linux-x64-deb"
+  | "linux-arm64-deb";
 
-/** Which download a file is, by its name: Nibblets-arm64.dmg and Nibblets-x64.dmg. */
+/**
+ * Which download a file is, by its name: Nibblets-arm64.dmg,
+ * Nibblets-setup-x64.exe, Nibblets-x64.AppImage, Nibblets-arm64.deb and so on.
+ */
 export function platformOf(name: string): Platform | null {
-  if (!name.endsWith(".dmg")) return null;
-  if (/arm64|aarch64/.test(name)) return "mac-arm64";
-  if (/x64|x86_64|intel/i.test(name)) return "mac-x64";
+  const arm = /arm64|aarch64/.test(name);
+  const x64 = /x64|x86_64|amd64|intel/i.test(name);
+  if (!arm && !x64) return null;
+  const arch = arm ? "arm64" : "x64";
+  if (name.endsWith(".dmg")) return `mac-${arch}`;
+  if (name.endsWith(".exe")) return `windows-${arch}`;
+  if (name.endsWith(".AppImage")) return `linux-${arch}-appimage`;
+  if (name.endsWith(".deb")) return `linux-${arch}-deb`;
   return null;
 }
 
@@ -152,6 +168,9 @@ export const FILE = /^[A-Za-z0-9._-]+$/;
 const CONTENT_TYPES: Record<string, string> = {
   dmg: "application/x-apple-diskimage",
   zip: "application/zip",
+  exe: "application/vnd.microsoft.portable-executable",
+  deb: "application/vnd.debian.binary-package",
+  AppImage: "application/vnd.appimage",
 };
 
 /** Streams one file of a release, as an attachment. */

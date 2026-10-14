@@ -9,6 +9,11 @@ const repo = "https://github.com/Infrawrench/nibblets";
 // Straight to the file, through the Worker (src/releases.ts): no JavaScript needed.
 const macArm = "/api/download/latest/Nibblets-arm64.dmg";
 const macIntel = "/api/download/latest/Nibblets-x64.dmg";
+const windows = "/api/download/latest/Nibblets-setup-x64.exe";
+const windowsArm = "/api/download/latest/Nibblets-setup-arm64.exe";
+const linuxAppImage = "/api/download/latest/Nibblets-x64.AppImage";
+const linuxDeb = "/api/download/latest/Nibblets-x64.deb";
+const linuxArm = "/api/download/latest/Nibblets-arm64.AppImage";
 
 const parade = [
   { name: "pip", label: "Pip", city: "London" },
@@ -80,20 +85,59 @@ const features: {
         Each nibblet is a hamster that chews through tasks for you. They use the Claude and ChatGPT
         subscriptions you already have, remember things, and get on with work while you're away.
       </p>
-      <div class="ctas">
-        <a class="button primary" href={macArm} download>
-          <Icon name="apple" /> Get the Mac app
-        </a>
-        <a class="button" href="https://app.nibblets.dev">
-          <Icon name="globe" /> Open Nibblets Connect
-        </a>
+      <!-- The Mac app leads until the script below knows better. -->
+      <div class="downloads" data-os="mac">
+        <div class="ctas">
+          <a class="button primary only-mac" href={macArm} download>
+            <Icon name="apple" /> Get the Mac app
+          </a>
+          <a class="button primary only-windows" href={windows} download>
+            <Icon name="windows" /> Get the Windows app
+          </a>
+          <a class="button primary only-linux" href={linuxAppImage} download>
+            <Icon name="linux" /> Get the Linux app
+          </a>
+          <a class="button" href="https://app.nibblets.dev">
+            <Icon name="globe" /> Open Nibblets Connect
+          </a>
+        </div>
+        <p class="note only-mac">
+          <span data-version>For Apple Silicon</span>
+          {" · "}
+          <a href={macIntel} download>
+            Intel Mac?
+          </a>
+        </p>
+        <p class="note only-windows">
+          <span data-version>For 64-bit Windows</span>
+          {" · "}
+          <a href={windowsArm} download>
+            Arm?
+          </a>
+        </p>
+        <p class="note only-linux">
+          <span data-version>An AppImage, for x64</span>
+          {" · "}
+          <a href={linuxDeb} download>
+            .deb
+          </a>
+          {" · "}
+          <a href={linuxArm} download>
+            Arm?
+          </a>
+        </p>
+        <p class="others">
+          <a class="not-mac" href={macArm} download>
+            <Icon name="apple" size={14} /> Mac
+          </a>
+          <a class="not-windows" href={windows} download>
+            <Icon name="windows" size={14} /> Windows
+          </a>
+          <a class="not-linux" href={linuxAppImage} download>
+            <Icon name="linux" size={14} /> Linux
+          </a>
+        </p>
       </div>
-      <p class="mac-note">
-        <span data-version>For Apple Silicon</span> ·
-        <a href={macIntel} download>
-          Intel Mac?
-        </a>
-      </p>
       <div class="install">
         <span class="install-label">
           <Icon name="linux" size={16} /> On a Linux server or VM:
@@ -229,11 +273,21 @@ const features: {
   </footer>
 
   <script>
+    import { hintedPlatform, osOf } from "../lib/platform.ts";
+
+    // Lead with this visitor's own download.
+    const downloads = document.querySelector<HTMLElement>(".downloads");
+    if (downloads) {
+      downloads.dataset.os = osOf({
+        userAgent: navigator.userAgent,
+        platform: hintedPlatform(navigator),
+      });
+    }
+
     // Name the version once it's known; the links work without this.
     fetch("/api/latest")
       .then((res) => (res.ok ? res.json() : null))
       .then((latest: unknown) => {
-        const label = document.querySelector("[data-version]");
         const version =
           typeof latest === "object" &&
           latest !== null &&
@@ -241,7 +295,10 @@ const features: {
           typeof latest.version === "string"
             ? latest.version
             : null;
-        if (label && version) label.textContent = `Version ${version}, for Apple Silicon`;
+        if (!version) return;
+        for (const label of document.querySelectorAll("[data-version]")) {
+          label.textContent = `Version ${version}, ${(label.textContent ?? "").replace(/^\w/, (c) => c.toLowerCase())}`;
+        }
       })
       .catch(() => undefined);
 
@@ -369,14 +426,33 @@ const features: {
     border-color: var(--fur-deep);
     color: #3b2412;
   }
-  .mac-note {
+  .downloads[data-os="mac"] :is(.only-windows, .only-linux, .not-mac),
+  .downloads[data-os="windows"] :is(.only-mac, .only-linux, .not-windows),
+  .downloads[data-os="linux"] :is(.only-mac, .only-windows, .not-linux) {
+    display: none;
+  }
+  .note {
     margin: 12px 0 0;
     font-size: 14px;
     color: var(--faint);
   }
-  .mac-note a {
+  .note a,
+  .others a {
     color: var(--dim);
     font-weight: 700;
+  }
+  .others {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin: 8px 0 0;
+    font-size: 14px;
+  }
+  .others a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
   }
   .install {
     margin-top: 30px;
