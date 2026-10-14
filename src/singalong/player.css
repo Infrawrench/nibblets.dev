@@ -1,0 +1,542 @@
+/* The singalong: a full-screen stage, the words over it, and the controls under them. */
+.sa {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #140e1e;
+  color: #fff;
+  font-family: Fredoka, ui-rounded, system-ui, sans-serif;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.sa[hidden] {
+  display: none;
+}
+.sa button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  padding: 0;
+}
+.sa :focus-visible {
+  outline: 3px solid #ffd27a;
+  outline-offset: 3px;
+}
+.sa-cv {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+/* the top: the song's name, and a way out */
+.sa-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: max(14px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 14px
+    max(18px, env(safe-area-inset-left));
+  z-index: 3;
+  pointer-events: none;
+}
+.sa-top > * {
+  pointer-events: auto;
+}
+.sa-x {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.12) !important;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s;
+}
+.sa-x:hover {
+  background: rgb(255 255 255 / 0.22) !important;
+}
+.sa-x svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* where we are in the song, and the odd word of explanation */
+.sa-sec {
+  position: absolute;
+  left: 50%;
+  top: max(76px, calc(env(safe-area-inset-top) + 62px));
+  transform: translateX(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 12px;
+  border-radius: 99px;
+  background: rgb(20 12 32 / 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.sa-sec::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tag, #ffd27a);
+}
+.sa-sec:empty {
+  display: none;
+}
+.sa-sec.swap {
+  animation: sa-drop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sa-hint {
+  position: absolute;
+  left: 50%;
+  top: max(120px, calc(env(safe-area-inset-top) + 106px));
+  transform: translate(-50%, -4px);
+  z-index: 2;
+  max-width: calc(100% - 32px);
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: rgb(255 250 242 / 0.94);
+  color: #3b2412;
+  font-family: Nunito, ui-rounded, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
+  opacity: 0;
+  transition:
+    opacity 0.4s,
+    transform 0.4s;
+  pointer-events: none;
+}
+.sa-hint.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.sa-hint b {
+  color: #b5541c;
+}
+
+/* the words: the line being sung, and the one after it, small, under it */
+.sa-lyrics {
+  position: absolute;
+  left: max(16px, env(safe-area-inset-left));
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  height: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.sa-l {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0 auto;
+  max-width: 22em;
+  text-align: center;
+  font-weight: 700;
+  font-size: clamp(26px, min(4.4vw, 6.6vh), 54px);
+  line-height: 1.15;
+  text-wrap: balance;
+  text-shadow: 0 3px 18px rgb(10 6 20 / 0.45);
+  transform-origin: 50% 100%;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.6em) scale(0.5);
+  transition:
+    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.35s ease,
+    visibility 0s 0.45s;
+}
+.sa-l.is-cur {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(calc(var(--nh, 0px) * -1 - 0.3em)) scale(1);
+  transition-delay: 0s;
+}
+.sa-l.is-next {
+  opacity: 0.45;
+  visibility: visible;
+  transform: scale(0.5);
+  transition-delay: 0s;
+}
+.sa-l.is-prev {
+  opacity: 0;
+  visibility: visible;
+  transform: translateY(calc(var(--nh, 0px) * -1 - var(--h, 1em) - 0.4em)) scale(0.8);
+  transition:
+    transform 0.35s cubic-bezier(0.4, 0, 0.6, 1),
+    opacity 0.2s ease,
+    visibility 0s 0.35s;
+}
+/* a word: dim until it's sung, then filled left to right in time with the voice */
+.sa-w {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+  transform-origin: 50% 85%;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-image: linear-gradient(
+    90deg,
+    var(--c, #fff) calc(var(--p, 0) * (100% + 0.4em) - 0.4em),
+    rgb(255 255 255 / 0.38) calc(var(--p, 0) * (100% + 0.4em))
+  );
+}
+.sa-w.is-on {
+  animation: sa-pop 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sa-w.sa-nib {
+  --c: #ffc27a;
+}
+.sa-w.sa-nib.is-on {
+  animation: sa-chomp 0.42s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sa-w.sa-kernow {
+  --c: #ffe08a;
+}
+.sa-w.sa-tech {
+  --c: #9ed8ff;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em;
+  letter-spacing: -0.04em;
+}
+@keyframes sa-pop {
+  40% {
+    transform: translateY(-0.08em) scale(1.08);
+  }
+}
+@keyframes sa-chomp {
+  25% {
+    transform: scale(1.16, 0.86);
+  }
+  55% {
+    transform: translateY(-0.12em) scale(0.94, 1.1);
+  }
+}
+@keyframes sa-drop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+}
+
+/* the controls */
+.sa-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px max(20px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+.sa-play {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #e9a95e !important;
+  color: #3b2412 !important;
+  box-shadow: 0 0 0 3px #c2803a inset;
+  display: grid;
+  place-items: center;
+  flex: none;
+  transition: transform 0.15s;
+}
+.sa-play:hover {
+  transform: scale(1.06) rotate(-4deg);
+}
+.sa-play:active {
+  transform: scale(0.94);
+}
+.sa-play svg {
+  width: 22px;
+  height: 22px;
+}
+.sa-track {
+  position: relative;
+  flex: 1;
+  height: 32px;
+  cursor: pointer;
+  touch-action: none;
+}
+.sa-rail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.2);
+  overflow: hidden;
+}
+.sa-fill {
+  position: absolute;
+  inset: 0;
+  background: #ffe7c2;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+.sa-tick {
+  position: absolute;
+  top: 50%;
+  width: 3px;
+  height: 12px;
+  margin: -6px 0 0 -1.5px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.4);
+}
+/* the knob: a little pasty, rolling along */
+.sa-knob {
+  position: absolute;
+  top: 50%;
+  width: 26px;
+  height: 18px;
+  margin: -12px 0 0 -13px;
+}
+.sa-time {
+  font-family: Nunito, ui-rounded, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 5.8em;
+  text-align: right;
+  color: rgb(255 255 255 / 0.75);
+}
+
+/* the cards at the start and the end */
+.sa-card {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+  background: radial-gradient(ellipse at 50% 35%, rgb(60 30 70 / 0.82), rgb(16 10 28 / 0.97) 75%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-align: center;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+.sa-card[hidden] {
+  display: none;
+}
+.sa-card.away {
+  opacity: 0;
+  transform: scale(1.06);
+  pointer-events: none;
+}
+.sa-card h2 {
+  font-size: clamp(44px, min(10vw, 12vh), 96px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: #fff;
+  text-shadow: 0 6px 30px rgb(0 0 0 / 0.4);
+}
+.sa-card h2 em {
+  font-style: normal;
+  color: #ffd27a;
+}
+.sa-card p {
+  margin: 0 auto 28px;
+  max-width: 30rem;
+  font-family: Nunito, ui-rounded, system-ui, sans-serif;
+  color: rgb(255 255 255 / 0.78);
+  font-size: 18px;
+  line-height: 1.55;
+}
+.sa-card p b {
+  color: #fff;
+}
+.sa .sa-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 30px;
+  border-radius: 99px;
+  background: #e9a95e !important;
+  color: #3b2412 !important;
+  box-shadow:
+    0 0 0 3px #c2803a inset,
+    0 12px 40px rgb(233 169 94 / 0.35);
+  font-weight: 700 !important;
+  font-size: 20px !important;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sa-go:hover {
+  transform: translateY(-2px) rotate(-1deg);
+}
+.sa-go:active {
+  transform: scale(0.97);
+}
+.sa-go svg {
+  width: 20px;
+  height: 20px;
+}
+.sa-keys {
+  margin-top: 26px;
+  font-family: Nunito, ui-rounded, system-ui, sans-serif;
+  font-size: 14px;
+  color: rgb(255 255 255 / 0.7);
+  line-height: 2;
+}
+.sa-keys kbd {
+  font: inherit;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+.sa-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.sa .sa-ghost {
+  padding: 14px 24px;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 0.12) !important;
+  font-weight: 600;
+  font-size: 17px;
+  text-decoration: none;
+  color: #fff;
+}
+.sa-ghost:hover {
+  background: rgb(255 255 255 / 0.2) !important;
+}
+.sa-cmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto 22px;
+  width: min(100%, 540px);
+  padding: 8px 8px 8px 16px;
+  border-radius: 16px;
+  background: #0d0816;
+  text-align: left;
+}
+.sa-cmd code {
+  flex: 1;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-size: 14px;
+  color: #ffe7c2;
+  user-select: all;
+  -webkit-user-select: all;
+}
+.sa .sa-cmd button {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.14) !important;
+  font-weight: 600;
+  font-size: 14px;
+}
+.sa-err {
+  margin-top: 16px;
+  color: #ffb3a8;
+  font-family: Nunito, ui-rounded, system-ui, sans-serif;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .sa-sec {
+    font-size: 14px;
+    top: max(70px, calc(env(safe-area-inset-top) + 58px));
+  }
+  .sa-hint {
+    font-size: 13px;
+    top: max(112px, calc(env(safe-area-inset-top) + 100px));
+  }
+  .sa-lyrics {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  .sa-bar {
+    gap: 10px;
+    padding-top: 10px;
+  }
+  .sa-time {
+    min-width: 0;
+    font-size: 13px;
+  }
+}
+@media (max-height: 520px) {
+  .sa-top {
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: 8px;
+  }
+  .sa-x {
+    width: 38px;
+    height: 38px;
+  }
+  .sa-sec {
+    top: 12px;
+    font-size: 13px;
+  }
+  .sa-hint {
+    display: none;
+  }
+  .sa-lyrics {
+    bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+  .sa-l {
+    font-size: clamp(20px, min(4vw, 8vh), 40px);
+  }
+  .sa-bar {
+    padding-top: 6px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .sa-play {
+    width: 42px;
+    height: 42px;
+  }
+  .sa-card h2 {
+    margin: 6px 0;
+  }
+  .sa-card p {
+    margin-bottom: 14px;
+    font-size: 16px;
+  }
+  .sa-keys {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sa-l {
+    transition-duration: 0.01s;
+  }
+  .sa-w.is-on,
+  .sa-w.sa-nib.is-on {
+    animation: none;
+  }
+}

@@ -1,0 +1,50 @@
+[verse1]
+Down in the deep of a Linux mine, where the Docker lanterns glow,
+There's a hamster in a container, and he's chewin' soft and slow,
+He never sleeps, he never stops, he's a thread that never ends,
+He wakes up with the heartbeat, boys, along with all his friends.
+[chorus]
+So nibble, nibble, Nibblets, chew the tasks all through the night,
+With Claude and Codex in their cheeks, they'll set the work to right,
+From Penzance to the Tamar, every server, every shore,
+Oh the Nibblets of Kernow, they'll be chewin' evermore!
+[verse2]
+Now old Cousin Jack would dig for tin with a candle on his head,
+But the nibblet keeps his memories in Postgres, so it's said,
+With pgvector deep beneath, where the durable things are stored,
+He'll not forget a single thing, not a pasty nor a word.
+[chorus]
+So nibble, nibble, Nibblets, chew the tasks all through the night,
+With Claude and Codex in their cheeks, they'll set the work to right,
+From Penzance to the Tamar, every server, every shore,
+Oh the Nibblets of Kernow, they'll be chewin' evermore!
+[verse3]
+He's spawned himself a litter, boys, of little child nibblets small,
+They scurry down the tunnels where the cloudflared breezes call,
+And if you want to watch him, through the Chromium you'll see,
+And take the wheel on Wayland, if you're bold as bold can be.
+[chorus]
+So nibble, nibble, Nibblets, chew the tasks all through the night,
+With Claude and Codex in their cheeks, they'll set the work to right,
+From Penzance to the Tamar, every server, every shore,
+Oh the Nibblets of Kernow, they'll be chewin' evermore!
+[verse4]
+Now the credproxy's a cunning fox, he guards the tokens tight,
+The containers never see them, no, not by day nor night,
+And the guard he asks you first, my love, before the tools are run,
+For a hamster with 1Password must be careful, every one.
+[chorus]
+So nibble, nibble, Nibblets, chew the tasks all through the night,
+With Claude and Codex in their cheeks, they'll set the work to right,
+From Penzance to the Tamar, every server, every shore,
+Oh the Nibblets of Kernow, they'll be chewin' evermore!
+[verse5]
+So curl it up from nibblets.dev, and pipe it into bash,
+Run it twice to sign again, it's done before the flash,
+And when they ask what licence, lads, we'll raise our cider high:
+"It's GPL-2.0, my son, and free until we die!"
+[final]
+So nibble, nibble, Nibblets, chew the tasks all through the night,
+With Claude and Codex in their cheeks, they'll set the work to right,
+From Penzance to the Tamar, every server, every shore,
+Oh the Nibblets of Kernow, Kernow bys vyken, evermore!

@@ -80,6 +80,17 @@ const features: {
   <main>
     <section class="wrap hero">
       <div class="logo" set:html={logo} />
+      <a class="sing" href="#singalong" data-sing>
+        <span class="sing-eq" aria-hidden="true">
+          <i></i>
+          <i></i>
+          <i></i>
+        </span>
+        Sing along to <em>Nibblets of Kernow</em>
+        <span class="sing-go" aria-hidden="true">
+          →
+        </span>
+      </a>
       <h1>Little agents that live on your own computers</h1>
       <p class="lede">
         Each nibblet is a hamster that chews through tasks for you. They use the Claude and ChatGPT
@@ -303,6 +314,17 @@ const features: {
       })
       .catch(() => undefined);
 
+    // The singalong, with its song, loads only when someone asks to sing.
+    const singalong = () => import("../singalong/player.ts");
+    for (const link of document.querySelectorAll<HTMLAnchorElement>("[data-sing]")) {
+      link.addEventListener("pointerenter", () => void singalong(), { once: true });
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        void singalong().then((player) => player.open());
+      });
+    }
+    if (location.hash === "#singalong") void singalong().then((player) => player.open());
+
     for (const button of document.querySelectorAll<HTMLButtonElement>("button[data-copy]")) {
       button.addEventListener("click", async () => {
         try {
@@ -366,7 +388,7 @@ const features: {
     padding: 24px 0 40px;
   }
   .logo {
-    width: min(220px, 52vw);
+    width: min(154px, 36vw);
     margin-bottom: 8px;
     animation: float 5s ease-in-out infinite;
     filter: drop-shadow(0 18px 24px rgb(58 116 196 / 0.22));
@@ -383,6 +405,66 @@ const features: {
     }
     50% {
       transform: translateY(-10px) rotate(1deg);
+    }
+  }
+  .sing {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 7px 14px 7px 12px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 2px solid var(--line);
+    box-shadow: var(--shadow);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    transition: transform 0.15s ease;
+  }
+  .sing:hover {
+    transform: translateY(-2px) rotate(-0.5deg);
+  }
+  .sing em {
+    font-style: normal;
+    color: var(--fur-deep);
+  }
+  .sing-go {
+    color: var(--faint);
+    transition: transform 0.15s ease;
+  }
+  .sing:hover .sing-go {
+    transform: translateX(3px);
+  }
+  /* a little equaliser, bouncing along */
+  .sing-eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+  .sing-eq i {
+    width: 3px;
+    height: 100%;
+    border-radius: 2px;
+    background: var(--fur);
+    transform-origin: 50% 100%;
+    animation: eq 0.9s ease-in-out infinite;
+  }
+  .sing-eq i:nth-child(2) {
+    animation-delay: -0.3s;
+  }
+  .sing-eq i:nth-child(3) {
+    animation-delay: -0.6s;
+  }
+  @keyframes eq {
+    0%,
+    100% {
+      transform: scaleY(0.35);
+    }
+    50% {
+      transform: scaleY(1);
     }
   }
   h1 {

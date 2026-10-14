@@ -3,3 +3,4 @@ dist
 .astro
 src/hamsters
 src/logo.svg
+src/singalong/song.json
