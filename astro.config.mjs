@@ -4,4 +4,6 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   site: "https://nibblets.dev",
   output: "static",
+  // Compression drops the line break before a link on its own line, gluing it to the text before.
+  compressHTML: false,
 });
