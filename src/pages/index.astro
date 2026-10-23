@@ -261,6 +261,18 @@ const features: {
       </ol>
     </section>
 
+    <section class="wrap free hands">
+      <Hamster name="nugget" size={96} mood="working" />
+      <div>
+        <h2>Hands for your hamsters</h2>
+        <p>
+          We also make <a href="https://infrawrench.com">Infrawrench</a>, one app for AWS, Google
+          Cloud, Azure, Kubernetes and 150+ more clouds. Connect a nibblet to the Infrawrench MCP
+          server, and it can lend a paw with your infrastructure too.
+        </p>
+      </div>
+    </section>
+
     <section class="wrap free">
       <Hamster name="toffee" size={96} mood="working" />
       <div>
@@ -276,7 +288,9 @@ const features: {
   <footer class="wrap">
     <span class="made">
       Made with <Icon name="heart" size={16} class="heart" /> by
-      <a href="https://infrawrench.com">Infrawrench</a>
+      <span>
+        <a href="https://infrawrench.com">Infrawrench</a>, makers of the Infrawrench cloud console
+      </span>
     </span>
     <span>
       <a href={repo}>GitHub</a> · <a href="https://app.nibblets.dev">Nibblets Connect</a> ·
@@ -817,6 +831,11 @@ const features: {
     background: var(--blue-soft);
     border-radius: var(--radius);
     max-width: 760px;
+  }
+  .hands {
+    background: var(--cream);
+    border: 2px solid var(--line);
+    margin-bottom: 0;
   }
   .free h2 {
     text-align: left;
